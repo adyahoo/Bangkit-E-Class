@@ -42,7 +42,6 @@ class SQLiteActivity : AppCompatActivity() {
         etBookName = findViewById(R.id.et_book_name)
 
         binding.rvBooks.layoutManager = LinearLayoutManager(this)
-        binding.rvBooks.setHasFixedSize(true)
         bookAdapter = MyBookAdapter(this)
         binding.rvBooks.adapter = bookAdapter
 
@@ -60,8 +59,8 @@ class SQLiteActivity : AppCompatActivity() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
+    override fun onStart() {
+        super.onStart()
         loadDataAsync()
     }
 
@@ -71,8 +70,9 @@ class SQLiteActivity : AppCompatActivity() {
             if (books.size > 0) {
                 bookAdapter.bookList = books as ArrayList<BookModel>
             } else {
-                bookAdapter.bookList = ArrayList()
-                Toast.makeText(this@SQLiteActivity, "No data at this moment", Toast.LENGTH_SHORT).show()
+                bookAdapter.bookList.clear()
+                bookAdapter.notifyDataSetChanged()
+                Toast.makeText(this@SQLiteActivity, "No Book Data at This Moment", Toast.LENGTH_SHORT).show()
             }
         }
     }
