@@ -1,9 +1,10 @@
 package com.muhammadfurqan.bangkit_e_class.sqlite
 
-/**
- * @author by furqan on 08/04/2021
- */
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
 data class BookModel(
     val id: Int,
     val name: String
-)
+):Parcelable

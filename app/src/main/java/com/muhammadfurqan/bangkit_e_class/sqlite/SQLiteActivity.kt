@@ -1,13 +1,19 @@
 package com.muhammadfurqan.bangkit_e_class.sqlite
 
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.AppCompatEditText
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.muhammadfurqan.bangkit_e_class.R
+import com.muhammadfurqan.bangkit_e_class.databinding.ActivitySqliteBinding
+import com.muhammadfurqan.bangkit_e_class.sqlite.adapter.MyBookAdapter
 import com.muhammadfurqan.bangkit_e_class.sqlite.db.MyBookDatabase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 class SQLiteActivity : AppCompatActivity() {
@@ -20,6 +26,9 @@ class SQLiteActivity : AppCompatActivity() {
     private lateinit var etBookName: AppCompatEditText
     private lateinit var btnAdd: AppCompatButton
     private lateinit var btnRead: AppCompatButton
+    private lateinit var bookAdapter: MyBookAdapter
+    private lateinit var binding: ActivitySqliteBinding
+    private lateinit var myBookDatabase: MyBookDatabase
 
     private val bookDatabase: MyBookDatabase by lazy {
         MyBookDatabase(this)
@@ -27,9 +36,18 @@ class SQLiteActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_sqlite)
+        binding = ActivitySqliteBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         etBookName = findViewById(R.id.et_book_name)
+
+        binding.rvBooks.layoutManager = LinearLayoutManager(this)
+        binding.rvBooks.setHasFixedSize(true)
+        bookAdapter = MyBookAdapter(this)
+        binding.rvBooks.adapter = bookAdapter
+
+        myBookDatabase = MyBookDatabase(this)
+        loadDataAsync()
 
         btnAdd = findViewById(R.id.btn_add)
         btnAdd.setOnClickListener {
@@ -42,6 +60,23 @@ class SQLiteActivity : AppCompatActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        loadDataAsync()
+    }
+
+    private fun loadDataAsync() {
+        lifecycleScope.launch {
+            val books = myBookDatabase.getAllBooks()
+            if (books.size > 0) {
+                bookAdapter.bookList = books as ArrayList<BookModel>
+            } else {
+                bookAdapter.bookList = ArrayList()
+                Toast.makeText(this@SQLiteActivity, "No data at this moment", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
     private fun onAdd() {
         val bookName = etBookName.text.toString()
         etBookName.setText("")
@@ -49,7 +84,9 @@ class SQLiteActivity : AppCompatActivity() {
         if (bookName.isNotEmpty()) {
             lifecycleScope.launch {
                 bookDatabase.addBook(bookName)
+                loadDataAsync()
             }
+            Toast.makeText(this, "Insert Book Success", Toast.LENGTH_SHORT).show()
         } else {
             Toast.makeText(this, "Please input the book name", Toast.LENGTH_SHORT).show()
         }

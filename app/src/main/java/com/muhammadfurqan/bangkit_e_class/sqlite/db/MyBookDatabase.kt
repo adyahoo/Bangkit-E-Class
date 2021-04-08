@@ -3,6 +3,7 @@ package com.muhammadfurqan.bangkit_e_class.sqlite.db
 import android.content.ContentValues
 import android.content.Context
 import com.muhammadfurqan.bangkit_e_class.sqlite.BookModel
+import kotlinx.coroutines.CoroutineScope
 
 /**
  * @author by furqan on 08/04/2021
@@ -28,8 +29,23 @@ class MyBookDatabase(context: Context) {
     }
 
     // create update function
+    fun updateBook(id: String, newName: String) {
+        val writeableDb = openHelper.writableDatabase
+
+        val values = ContentValues()
+        values.put(MyBookOpenHelper.FIELD_NAME, newName)
+
+        writeableDb.update(MyBookOpenHelper.TABLE_BOOK, values, "${MyBookOpenHelper.FIELD_ID} = ?", arrayOf(id))
+        writeableDb.close()
+    }
 
     // create delete function
+    fun deleteBook(id: String) {
+        val writeableDb = openHelper.writableDatabase
+
+        writeableDb.delete(MyBookOpenHelper.TABLE_BOOK, "${MyBookOpenHelper.FIELD_ID} = ?", arrayOf(id))
+        writeableDb.close()
+    }
 
     fun getAllBooks(): List<BookModel> {
         val bookList: MutableList<BookModel> = mutableListOf()
